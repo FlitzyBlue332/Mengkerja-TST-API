@@ -1,9 +1,9 @@
 import uvicorn
 from fastapi import FastAPI, Body, Depends, HTTPException, status
 
-from app.models import DataSchema, UserSchema, UserLoginSchema
-from app.auth.auth_bearer import JWTBearer
-from app.auth.auth_handler import signJWT
+from models import DataSchema, UserSchema, UserLoginSchema, Train_data
+from auth.auth_bearer import JWTBearer
+from auth.auth_handler import signJWT
 
 posts = [
     {
@@ -29,8 +29,6 @@ users = [
 
 app = FastAPI()
 
-
-
 def check_user(data: UserLoginSchema):
     for user in users:
         if user.email == data.email and user.password == data.password:
@@ -48,6 +46,8 @@ def check_username(data: UserLoginSchema):
         if user.username == data.username:
             return True
     return False
+
+
 
 # route handlers
 
