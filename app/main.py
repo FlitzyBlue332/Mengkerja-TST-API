@@ -1,27 +1,12 @@
 import uvicorn
 from fastapi import FastAPI, Body, Depends, HTTPException, status
 
-from models import DataSchema, UserSchema, UserLoginSchema, Train_data
+from models import UserSchema, UserLoginSchema, Data_Predict, User_Train_data
 from auth.auth_bearer import JWTBearer
 from auth.auth_handler import signJWT
+import classification
+from database import database
 
-posts = [
-    {
-        "id": 1,
-        "title": "Penguins ",
-        "text": "Penguins are a group of aquatic flightless birds."
-    },
-    {
-        "id": 2,
-        "title": "Tigers ",
-        "text": "Tigers are the largest living cat species and a memeber of the genus panthera."
-    },
-    {
-        "id": 3,
-        "title": "Koalas ",
-        "text": "Koala is arboreal herbivorous maruspial native to Australia."
-    },
-]
 
 users = [
     UserSchema(username= "FlitzyBlue332", email="FlitzyBlue332@sugarmail.com", password="Minut200130")
@@ -49,6 +34,7 @@ def check_username(data: UserLoginSchema):
 
 
 
+
 # route handlers
 
 # testing
@@ -56,34 +42,29 @@ def check_username(data: UserLoginSchema):
 def greet():
     return {"Administrator": "Welcome to mein API!!"}
 
+# prediction
+@app.post("/classify/predict", tags=["classification"])
+def prediction(data: Data_Predict = Body(...)):
+    result = classification.predict(data)
+    if(result == 1):
+        return {"Hasil Prediksi":"Membeli"}
+    else:
+        return {"Hasil Prediksi":"Tidak Membeli"}
 
+# Add training data
+@app.post("/classify/train_data", dependencies=[Depends(JWTBearer())], tags=["classification"])
+def addTrainingData(data: User_Train_data = Body(...)):
+    if(database.checkInsertData):
+        database.insertData(data)
+        return {"message":"insert berhasil dilakukan"}
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="income value must be 'low' or 'high'")
+    
 # Get datas
-@app.get("/posts", tags=["posts"])
-def get_posts():
-    return { "data": posts }
-
-
-@app.get("/posts/{id}", tags=["posts"])
-def get_single_post(id: int):
-    if id > len(posts):
-        return {
-            "error": "No such post with the supplied ID."
-        }
-
-    for post in posts:
-        if post["id"] == id:
-            return {
-                "data": post
-            }
-
-
-@app.post("/posts", dependencies=[Depends(JWTBearer())], tags=["posts"])
-def add_post(post: DataSchema):
-    post.id = len(posts) + 1
-    posts.append(post.dict())
-    return {
-        "data": "post added."
-    }
+@app.get("/classify/get_data", tags=["classification"])
+def get_train_data():
+    datas = database.getalldata()
+    return datas
 
 
 @app.post("/user/signup", dependencies=[Depends(JWTBearer())], tags=["user"])

@@ -2,37 +2,6 @@ from pydantic import BaseModel, Field, EmailStr
 from sqlmodel import SQLModel
 from typing import Optional
 
-class DataSchema(BaseModel):
-    id: int = Field(default=None)
-    title: str = Field(...)
-    content: str = Field(...)
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "title": "Sugar",
-                "content": "Wangy Wangy Wangy Wangy"
-            }
-        }
-
-class Train_data(SQLModel, table=True):
-    '''
-    isi database adalah:  
-    id: int
-    income: str
-    student: bool
-    likes_vtuber: bool
-    likes_anime: bool
-    likes_manga: bool
-    buys_product: bool
-    '''
-    id: Optional[int] = Field(default=None, primary_key=True)
-    income: str
-    student: bool
-    likes_vtuber: bool
-    likes_anime: bool
-    likes_manga: bool
-    buys_product: bool
 
 class Data_Predict(BaseModel):
     income: str = Field(...)
@@ -41,12 +10,36 @@ class Data_Predict(BaseModel):
     likes_anime: bool = Field(...)
     likes_manga: bool = Field(...)
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "income": "low",
+                "student": "true",
+                "likes_vtuber": "true",
+                "likes_anime": "true",
+                "likes_manga": "true"
+            }
+        }
+
 class User_Train_data(BaseModel):
+    income: str = Field(...)
     student: bool = Field(...)
     likes_vtuber: bool = Field(...)
     likes_anime: bool = Field(...)
     likes_manga: bool = Field(...)
     buys_product: bool = Field(...)
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "income": "low",
+                "student": "true",
+                "likes_vtuber": "true",
+                "likes_anime": "true",
+                "likes_manga": "true",
+                "buys_product": "true"
+            }
+        }
 
 class UserSchema(BaseModel):
     username: str = Field(...)
