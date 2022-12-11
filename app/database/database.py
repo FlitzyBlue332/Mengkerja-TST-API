@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlmodel import Field, Session, SQLModel, create_engine, select
-from models import User_Train_data
+from models import User_Train_data, UserSchema
 
 
 engine = create_engine("sqlite:///database.db")
@@ -26,6 +26,11 @@ class Train_data(SQLModel, table=True):
     likes_manga: bool
     buys_product: bool
 
+# kelas khusus user
+class User_data(SQLModel, table=True):
+    username: str = Field(primary_key=True)
+    email: str
+    password: str
 
 # untuk classification
 def getalldata():
@@ -64,7 +69,7 @@ def arrayTrain():
 
 
 # insert data
-def insertData(data:User_Train_data):
+def insertClassiData(data:User_Train_data):
     sample = Train_data(
         income= data.income,
         student= data.student,
@@ -76,8 +81,24 @@ def insertData(data:User_Train_data):
     s.add(sample)
     s.commit()
 
+
 def checkInsertData(data:User_Train_data):
     '''
     kalau true berarti aman di insert
     '''
     return data.income == 'high' or data.income == 'low'
+
+# untuk user
+def insertUser(data:UserSchema):
+    sample = User_data(
+        username=data.username,
+        email=data.email,
+        password=data.password
+    )
+    s.add(sample)
+    s.commit()
+
+def getUser():
+    statement = select(User_data)
+    datas = s.exec(statement).all()
+    return datas

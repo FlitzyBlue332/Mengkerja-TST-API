@@ -8,25 +8,24 @@ import classification
 from database import database
 
 
-users = [
-    UserSchema(username= "FlitzyBlue332", email="FlitzyBlue332@sugarmail.com", password="Minut200130")
-]
-
 app = FastAPI()
 
 def check_user(data: UserLoginSchema):
+    users = database.getUser()
     for user in users:
         if user.email == data.email and user.password == data.password:
             return True
     return False
 
-def check_email(data: UserLoginSchema):
+def check_email(data):
+    users = database.getUser()
     for user in users:
         if user.email == data.email:
             return True
     return False
 
-def check_username(data: UserLoginSchema):
+def check_username(data):
+    users = database.getUser()
     for user in users:
         if user.username == data.username:
             return True
@@ -51,11 +50,13 @@ def prediction(data: Data_Predict = Body(...)):
     else:
         return {"Hasil Prediksi":"Tidak Membeli"}
 
+
+
 # Add training data
 @app.post("/classify/train_data", dependencies=[Depends(JWTBearer())], tags=["classification"])
 def addTrainingData(data: User_Train_data = Body(...)):
     if(database.checkInsertData):
-        database.insertData(data)
+        database.insertClassiData(data)
         return {"message":"insert berhasil dilakukan"}
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="income value must be 'low' or 'high'")
@@ -73,7 +74,7 @@ def create_user(user: UserSchema = Body(...)):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email already exists")
     if(check_username(user)):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="username already exists")
-    users.append(user) # replace with db call, making sure to hash the password first
+    database.insertUser(user)
     return signJWT(user.email)
 
 
